@@ -1,5 +1,4 @@
 import 'package:graphql_flutter/graphql_flutter.dart';
-
 import '../models/product_model.dart';
 import '../queries/product_queries.dart';
 
@@ -12,6 +11,7 @@ class ProductRepository {
     final result = await client.query(
       QueryOptions(
         document: gql(ProductQueries.getAllProducts),
+        fetchPolicy: FetchPolicy.networkOnly,
       ),
     );
 
@@ -19,16 +19,20 @@ class ProductRepository {
       throw Exception(result.exception.toString());
     }
 
-    final List data = result.data?['products'] ?? [];
+    final List data = result.data?['getAllProducts'] ?? [];
 
-    return data.map((e) => Product.fromJson(e)).toList();
+    return data
+        .map((item) => Product.fromJson(item as Map<String, dynamic>))
+        .toList();
   }
+
 
   Future<Product> getProductById(String id) async {
     final result = await client.query(
       QueryOptions(
         document: gql(ProductQueries.getProductById),
         variables: {"id": id},
+        fetchPolicy: FetchPolicy.networkOnly,
       ),
     );
 
@@ -36,14 +40,22 @@ class ProductRepository {
       throw Exception(result.exception.toString());
     }
 
-    return Product.fromJson(result.data!['product']);
+    final data = result.data?['getProductById'];
+
+    if (data == null) {
+      throw Exception("Product not found");
+    }
+
+    return Product.fromJson(data as Map<String, dynamic>);
   }
+
 
   Future<List<Product>> searchProducts(String keyword) async {
     final result = await client.query(
       QueryOptions(
         document: gql(ProductQueries.searchProducts),
         variables: {"keyword": keyword},
+        fetchPolicy: FetchPolicy.networkOnly,
       ),
     );
 
@@ -53,6 +65,8 @@ class ProductRepository {
 
     final List data = result.data?['searchProducts'] ?? [];
 
-    return data.map((e) => Product.fromJson(e)).toList();
+    return data
+        .map((item) => Product.fromJson(item as Map<String, dynamic>))
+        .toList();
   }
 }

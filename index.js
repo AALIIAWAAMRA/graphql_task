@@ -11,15 +11,15 @@ const resolvers = {
       getAllProducts: () => {
          return products;
       },
-      getProductById: (id) => {
-         return products.find(product => product.id === id);
-      },
-      searchProducts: (keyword) => {
-         return products.filter(product =>
-            product.name.toLowerCase().includes(keyword.toLowerCase()) ||
-            product.description.toLowerCase().includes(keyword.toLowerCase())
-         );
-      }
+     getProductById: (_, { id }) => {
+   return products.find(product => product.id === id);
+},
+searchProducts: (_, { keyword }) => {
+   return products.filter(product =>
+      product.name.toLowerCase().includes(keyword.toLowerCase()) ||
+      product.description.toLowerCase().includes(keyword.toLowerCase())
+   );
+}
    }
 }
 

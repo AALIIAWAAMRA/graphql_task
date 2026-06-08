@@ -1,23 +1,25 @@
 class ProductQueries {
+
   static const String getAllProducts = r'''
-    query GetProducts {
-      products {
+    query GetAllProducts {
+      getAllProducts {
         id
         name
+        description
         price
-        imageUrl
+        img_url
       }
     }
   ''';
 
   static const String getProductById = r'''
-    query GetProduct($id: ID!) {
-      product(id: $id) {
+    query GetProductById($id: ID!) {
+      getProductById(id: $id) {
         id
         name
         description
         price
-        imageUrl
+        img_url
       }
     }
   ''';
@@ -27,10 +29,10 @@ class ProductQueries {
       searchProducts(keyword: $keyword) {
         id
         name
+        description
         price
-        imageUrl
+        img_url
       }
     }
   ''';
 }
-

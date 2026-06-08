@@ -19,7 +19,8 @@ class Product {
       name: json['name'] ?? '',
       description: json['description'] ?? '',
       price: (json['price'] ?? 0).toDouble(),
-      imageUrl: json['imageUrl'] ?? '',
+
+      imageUrl: json['img_url'] ?? '',
     );
   }
 }

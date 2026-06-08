@@ -18,6 +18,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
   bool isLoading = true;
   String error = '';
 
+  String searchKeyword = '';
   late ProductRepository repository;
 
   @override
@@ -31,8 +32,18 @@ class _ProductsScreenState extends State<ProductsScreen> {
   }
 
   Future<void> fetchProducts() async {
+    setState(() {
+      isLoading = true;
+      error = '';
+    });
+
     try {
-      final data = await repository.getProducts();
+      List<Product> data;
+      if (searchKeyword.isEmpty) {
+        data = await repository.getProducts();
+      } else {
+        data = await repository.searchProducts(searchKeyword);
+      }
 
       setState(() {
         products = data;
@@ -48,42 +59,70 @@ class _ProductsScreenState extends State<ProductsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
-    }
-
-    if (error.isNotEmpty) {
-      return Scaffold(
-        body: Center(child: Text(error)),
-      );
-    }
-
     return Scaffold(
       appBar: AppBar(
         title: const Text("Products"),
-      ),
-      body: ListView.builder(
-        itemCount: products.length,
-        itemBuilder: (context, index) {
-          final product = products[index];
-
-          return ProductCard(
-            product: product,
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => ProductDetailsScreen(
-                    productId: product.id,
-                  ),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(60.0),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              decoration: InputDecoration(
+                hintText: 'Search products...',
+                prefixIcon: const Icon(Icons.search),
+                fillColor: Colors.grey[200],
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide.none,
                 ),
-              );
-            },
-          );
-        },
+                filled: true,
+              ),
+              onChanged: (value) {
+                setState(() {
+                  searchKeyword = value;
+                });
+                fetchProducts();
+              },
+            ),
+          ),
+        ),
       ),
+      body: _buildBody(),
+    );
+  }
+
+  Widget _buildBody() {
+    if (isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (error.isNotEmpty) {
+      return Center(child: Text(error));
+    }
+
+    if (products.isEmpty) {
+      return const Center(child: Text("No products found"));
+    }
+
+    return ListView.builder(
+      itemCount: products.length,
+      itemBuilder: (context, index) {
+        final product = products[index];
+
+        return ProductCard(
+          product: product,
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => ProductDetailsScreen(
+                  productId: product.id,
+                ),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }
